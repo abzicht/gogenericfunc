@@ -31,7 +31,14 @@ func (l Left[A, E]) GetRight() A                                 { panic(EitherE
 func (l Left[A, E]) FlatMap(f func(A) Either[A, E]) Either[A, E] { return l }
 func (l Left[A, E]) Filter(f func(A) bool) Either[A, E]          { return l }
 func (l Left[A, E]) Equal(e Either[A, E]) bool {
-	return cmp.Equal(l.GetLeft(), e.GetLeft()) && cmp.Equal(l.GetRight(), e.GetRight())
+	switch e.(type) {
+	case Left[A, E]:
+		return cmp.Equal(l.GetLeft(), e.GetLeft())
+	case Right[A, E]:
+		return false
+	default:
+		return false
+	}
 }
 
 type Right[A, E any] struct {
@@ -48,5 +55,12 @@ func (r Right[A, E]) FlatMap(f func(A) Either[A, E]) Either[A, E] {
 	return f(r.GetRight())
 }
 func (r Right[A, E]) Equal(e Either[A, E]) bool {
-	return cmp.Equal(r.GetLeft(), e.GetLeft()) && cmp.Equal(r.GetRight(), e.GetRight())
+	switch e.(type) {
+	case Left[A, E]:
+		return false
+	case Right[A, E]:
+		return cmp.Equal(r.GetRight(), e.GetRight())
+	default:
+		return false
+	}
 }
